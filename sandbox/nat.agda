@@ -1,6 +1,6 @@
 module nat where
 
-open import Agda.Builtin.Equality
+-- open import Agda.Builtin.Equality
 -- open import Relation.Binary.PropositionalEquality
 
 data Nat : Set where
@@ -45,8 +45,8 @@ suc x - zero = suc x
 suc x - suc y = x - y
 
 
--- data _≡_ {A : Set} : A → A → Set where
---   refl : {x : A} → x ≡ x
+data _≡_ {A : Set} : A → A → Set where
+  refl : {x : A} → x ≡ x
 
 sym : {A : Set} {x y : A} -> x ≡ y -> y ≡ x
 sym refl = refl
@@ -109,20 +109,25 @@ add-assoc (suc x) y z = trans (cong suc (add-assoc x y z)) (add-assoc-lemma x y 
 -- suc (x + (y + z))
 -- (suc x) + (y + z)
 
-left-mul-0 : (x : Nat) → zero * x ≡ zero
+left-mul-0 : (x : Nat) → (zero * x) ≡ zero
 left-mul-0 zero = refl
 left-mul-0 (suc x) = left-mul-0 x
 
-right-mul-0 : (x : Nat) → x * zero ≡ zero * x
-right-mul-0 zero = refl 
-right-mul-0 (suc x) rewrite left-mul-0 x = refl
 
-left-mul-1 : (x : Nat) → (suc zero) * x ≡ x
+right-mul-0-lemma : (x : Nat) → ((suc x) * zero) ≡ (zero * ((suc x) * zero))
+right-mul-0-lemma x = refl
+
+right-mul-0 : (x : Nat) → (x * zero) ≡ (zero * x)
+right-mul-0 zero = refl 
+right-mul-0 (suc x) = trans (right-mul-0-lemma x) (sym (left-mul-0 x))
+-- right-mul-0 (suc x) rewrite left-mul-0 x = refl
+
+left-mul-1 : (x : Nat) → ((suc zero) * x) ≡ x
 left-mul-1 zero = refl
 left-mul-1 (suc x) = cong suc (left-mul-1 x)
 
 
-add-0 : (x : Nat) → x + zero ≡ x
+add-0 : (x : Nat) → (x + zero) ≡ x
 add-0 zero = refl
 add-0 (suc x) = cong suc (add-0 x)
 
@@ -135,11 +140,11 @@ add-swap-lemma : (x y z : Nat) → suc (x + (y + z)) ≡ (x + suc (y + z))
 add-swap-lemma zero y z = refl
 add-swap-lemma (suc x) y z = cong suc (add-swap-lemma x y z)
 
-add-swap : (x y z : Nat) → x + (y + z) ≡ y + (x + z)
+add-swap : (x y z : Nat) → (x + (y + z)) ≡ (y + (x + z))
 add-swap zero y z = refl
 add-swap (suc x) y z = trans (cong suc (add-swap x y z)) (add-swap-lemma y x z)
 
-right-lemma : (x y : Nat) → x * (suc y) ≡ x + (x * y)
+right-lemma : (x y : Nat) → (x * (suc y)) ≡ (x + (x * y))
 right-lemma x y = refl
 
 -- trans を使うためにクソみたいな証明している．
@@ -148,17 +153,17 @@ lemma-lemma1 : (x : Nat) → suc x ≡ (suc x + (zero * suc x))
 lemma-lemma1 zero = refl
 lemma-lemma1 (suc x) = cong suc (lemma-lemma1 x)
 
-lemma2 : (x y : Nat) → (suc (suc x)) * (suc y) ≡ (suc (suc x)) + ((suc (suc x)) * y)
+lemma2 : (x y : Nat) → ((suc (suc x)) * (suc y)) ≡ ((suc (suc x)) + ((suc (suc x)) * y))
 lemma2 x y = refl
 
-lemma3 : (x : Nat) → (suc (suc x)) ≡ (suc zero) + (suc x)
+lemma3 : (x : Nat) → ((suc (suc x))) ≡ ((suc zero) + (suc x))
 lemma3 x = refl
 
 lemma4 : (x : Nat) → ((suc zero) + x) ≡ (suc x)
 lemma4 x = refl
 
 
-lemma1 : (x y : Nat) → (suc x) * y ≡ y + (x * y)
+lemma1 : (x y : Nat) → ((suc x) * y) ≡ (y + (x * y))
 lemma1 zero zero = refl
 lemma1 zero (suc y) = trans (cong suc (left-mul-1 y)) (lemma-lemma1 y)
 -- lemma1 zero (suc y) rewrite left-mul-1 y | left-mul-0 y | add-0 y = refl
